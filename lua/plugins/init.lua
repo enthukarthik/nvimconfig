@@ -23,6 +23,7 @@ return {
 
   {
     "nvim-treesitter/nvim-treesitter",
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = {
       "nvim-treesitter/nvim-treesitter-context",
     },
@@ -78,6 +79,15 @@ return {
           "xml",
           "yaml",
         },
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            init_selection = "<C-Space>",
+            node_incremental = "<C-Space>",
+            node_decremental = "<bs>",
+            scope_incremental = false,
+          },
+        },
         auto_install = true,
         highlight = {
           enable = true,
@@ -114,6 +124,7 @@ return {
 
   {
     "nvim-telescope/telescope.nvim",
+    branch = "0.1.x",
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-tree/nvim-web-devicons",
@@ -133,10 +144,11 @@ return {
       local builtins = require("telescope.builtin")
       local actions = require("telescope.actions")
 
-      Map("n", "<leader>ff", builtins.find_files, { desc = "Open telescope find files dialog" })
-      Map("n", "<leader>fb", builtins.buffers, { desc = "Open telescope find buffer dialog" })
-      Map("n", "<leader>fg", builtins.live_grep, { desc = "Open telescope live grep dialog" })
-      Map("n", "<leader>fs", builtins.grep_string, { desc = "Open telescope grep string dialog" })
+      Map("n", "<leader>ff", builtins.find_files, { desc = "Fuzzy find files in pwd" })
+      Map("n", "<leader>fr", builtins.oldfiles, { desc = "Fuzzy find recent files" })
+      Map("n", "<leader>fb", builtins.buffers, { desc = "Fuzzy find from buffers" })
+      Map("n", "<leader>fs", builtins.live_grep, { desc = "Find string in pwd" })
+      Map("n", "<leader>f*", builtins.grep_string, { desc = "Find string under cursor in pwd" })
       Map("n", "<leader>tf", ":Telescope file_browser<CR>", { desc = "Open telescope file browser extension" })
       Map("n", "<leader>te", ":Telescope emoji<CR>", { desc = "Open telescope emoji extension" })
       Map("n", "<leader>tg", ":Telescope glyph<CR>", { desc = "Open telescope glyph extension" })
@@ -144,11 +156,13 @@ return {
 
       telescope.setup({
         defaults = {
+          path_display = { "smart" },
           mappings = {
             i = {
               ["<C-j>"] = actions.move_selection_next,
               ["<C-k>"] = actions.move_selection_previous,
               ["<C-h>"] = actions.which_key,
+              ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               ["<leader><leader>"] = actions.close,
             },
           },
@@ -171,7 +185,7 @@ return {
     -- gcO - add line comment above and enter Insert mode
     -- gco - add line comment below and enter Insert mode
     "numToStr/Comment.nvim",
-    event = "VeryLazy",
+    event = {"BufReadPre", "BufNewFile"},
     opts = {},
   },
   -- Surrounding something with a specific character using nvim-surround
@@ -276,7 +290,7 @@ return {
   -- show indentation using a vertical line
   {
     "lukas-reineke/indent-blankline.nvim",
-    event = "VeryLazy",
+    event = { "BufReadPre", "BufNewFile" },
     main = "ibl",
     opts = {},
   },
@@ -295,11 +309,6 @@ return {
       "MunifTanjim/nui.nvim",
     },
     config = function()
-      vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
-      vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
-      vim.fn.sign_define("DiagnosticSignInfo", { text = " ", texthl = "DiagnosticSignInfo" })
-      vim.fn.sign_define("DiagnosticSignHint", { text = "󰌵 ", texthl = "DiagnosticSignHint" })
-
       require("neo-tree").setup({
         close_if_last_window = true,
         filesystem = {
@@ -367,23 +376,33 @@ return {
   },
   {
     "L3MON4D3/LuaSnip",
+    version = "v2.*",
+    -- build = "make install_jsregexp",
     dependencies = {
-      "saadparwaiz1/cmp_luasnip",
-      "rafamadriz/friendly-snippets",
+      "saadparwaiz1/cmp_luasnip", -- for autocompletion
+      "rafamadriz/friendly-snippets", -- useful snippets
     },
   },
   {
     "hrsh7th/nvim-cmp",
-    event = { "BufReadPost", "BufNewFile" },
+    event = "InsertEnter",
+    dependencies = {
+      "hrsh7th/cmp-buffer", -- source for text in buffer
+      "hrsh7th/cmp-path", -- source for file system paths
+      "onsails/lspkind.nvim", -- vs-code like pictograms
+    },
     config = function()
       local cmp = require("cmp")
+      local luasnip = require("luasnip")
+      local lspkind = require("lspkind")
 
+      -- loads vscode style snippets from installed plugins (e.g. friendly-snippets)
       require("luasnip.loaders.from_vscode").lazy_load()
 
       cmp.setup({
         snippet = {
           expand = function(args)
-            require("luasnip").lsp_expand(args.body)
+            luasnip.lsp_expand(args.body)
           end,
         },
         window = {
@@ -391,8 +410,8 @@ return {
           documentation = cmp.config.window.bordered(),
         },
         mapping = cmp.mapping.preset.insert({
-          ["<C-k>"] = cmp.mapping.select_prev_item(), -- previous suggestion
           ["<C-j>"] = cmp.mapping.select_next_item(), -- next suggestion
+          ["<C-k>"] = cmp.mapping.select_prev_item(), -- previous suggestion
           ["<C-b>"] = cmp.mapping.scroll_docs(-4),
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<C-Space>"] = cmp.mapping.complete(),
@@ -401,18 +420,29 @@ return {
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
-          { name = "luasnip" },
-        }, {
-            { name = "buffer" },
+          { name = "luasnip" }, -- snippets
+          { name = "buffer" }, -- text within the current buffer
+          { name = "path" }, -- file system paths
+        }),
+        -- configure lspking for vs-code like pictograms in completion menu
+        formatting = {
+          format = lspkind.cmp_format({
+            maxwidth = 50,
+            ellipsis_char = "...",
           }),
+        },
       })
     end,
   },
   {
     "neovim/nvim-lspconfig",
-    event = { "BufReadPost", "BufNewFile" },
+    event = { "BufReadPre", "BufNewFile" },
     cmd = { "LspInfo", "LspInstall", "LspUninstall" },
-    dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim" },
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim"
+    },
     config = function()
       local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -475,6 +505,35 @@ return {
           -- end, opts)
         end,
       })
+
+      vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
+      vim.fn.sign_define("DiagnosticSignWarn",  { text = " ", texthl = "DiagnosticSignWarn"  })
+      vim.fn.sign_define("DiagnosticSignInfo",  { text = " ", texthl = "DiagnosticSignInfo"  })
+      vim.fn.sign_define("DiagnosticSignHint",  { text = "󰌵 ", texthl = "DiagnosticSignHint"  })
+    end,
+  },
+  -- add autopairs to add automatic brackets, quotes, etc
+  {
+    "windwp/nvim-autopairs",
+    event = { "InsertEnter" },
+    dependencies = {
+      "hrsh7th/nvim-cmp",
+    },
+    config = function()
+      local autopairs = require("nvim-autopairs")
+      autopairs.setup({
+        check_ts = true, -- enable treesitter
+        ts_config = {
+          lua = { "string" }, -- don't add pairs in lua string treesitter nodes
+          javascript = { "template_string" }, -- don't add pairs in javascript template_string treesiter nodes
+          java = false, -- don't check treesitter on java
+        },
+      })
+
+      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+      local cmp = require("cmp")
+
+      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
     end,
   },
 }
