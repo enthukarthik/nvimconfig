@@ -103,10 +103,10 @@ return {
         Map({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous, {})
 
         -- Optionally, make builtin f, F, t, T also repeatable with ; and ,
-        Map({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f, {})
-        Map({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F, {})
-        Map({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t, {})
-        Map({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T, {})
+        Map({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
+        Map({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true })
+        Map({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
+        Map({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true })
     end,
   },
 
