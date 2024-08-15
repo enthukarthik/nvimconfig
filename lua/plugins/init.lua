@@ -2,17 +2,23 @@ return {
   -- various colorschemes
 
   { "tanvirtin/monokai.nvim",  priority = 1000,},
-  { "Shatur/neovim-ayu",       priority = 1000,},
-  { "tiagovla/tokyodark.nvim", priority = 1000,},
-  { "folke/tokyonight.nvim",   priority = 1000,},
+  -- { "Shatur/neovim-ayu",       priority = 1000,},
+  -- { "tiagovla/tokyodark.nvim", priority = 1000,},
+  -- { "folke/tokyonight.nvim",   priority = 1000,},
+  --
+  -- { "ellisonleao/gruvbox.nvim", name = "gruvbox",    priority = 1000,},
+  -- { "catppuccin/nvim",          name = "catppuccin", priority = 1000,},
+  -- { "decaycs/decay.nvim",       name = "decay",      priority = 1000,},
+  -- { "Everblush/nvim",           name = "everblush",  priority = 1000,},
+  -- { "rebelot/kanagawa.nvim",    name = "kanagawa",   priority = 1000,},
+  -- { "navarasu/onedark.nvim",    name = "onedark",    priority = 1000,},
 
-  { "ellisonleao/gruvbox.nvim", name = "gruvbox",    priority = 1000,},
-  { "catppuccin/nvim",          name = "catppuccin", priority = 1000,},
-  { "decaycs/decay.nvim",       name = "decay",      priority = 1000,},
-  { "Everblush/nvim",           name = "everblush",  priority = 1000,},
-  { "rebelot/kanagawa.nvim",    name = "kanagawa",   priority = 1000,},
-  { "navarasu/onedark.nvim",    name = "onedark",    priority = 1000,},
-
+  -- which-key plugin to notify keymappings configured
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    opts = {},
+  },
   -- tree-sitter using nvim-treesitter
 
   {
@@ -127,14 +133,14 @@ return {
       local builtins = require("telescope.builtin")
       local actions = require("telescope.actions")
 
-      Map("n", "<leader>ff", builtins.find_files, {})
-      Map("n", "<leader>fb", builtins.buffers, {})
-      Map("n", "<leader>fg", builtins.live_grep, {})
-      Map("n", "<leader>fs", builtins.grep_string, {})
-      Map("n", "<leader>tf", ":Telescope file_browser<CR>", {})
-      Map("n", "<leader>te", ":Telescope emoji<CR>", {})
-      Map("n", "<leader>tg", ":Telescope glyph<CR>", {})
-      Map("n", "<leader>tq", ":Telescope frecency<CR>", {})
+      Map("n", "<leader>ff", builtins.find_files, { desc = "Open telescope find files dialog" })
+      Map("n", "<leader>fb", builtins.buffers, { desc = "Open telescope find buffer dialog" })
+      Map("n", "<leader>fg", builtins.live_grep, { desc = "Open telescope live grep dialog" })
+      Map("n", "<leader>fs", builtins.grep_string, { desc = "Open telescope grep string dialog" })
+      Map("n", "<leader>tf", ":Telescope file_browser<CR>", { desc = "Open telescope file browser extension" })
+      Map("n", "<leader>te", ":Telescope emoji<CR>", { desc = "Open telescope emoji extension" })
+      Map("n", "<leader>tg", ":Telescope glyph<CR>", { desc = "Open telescope glyph extension" })
+      Map("n", "<leader>tq", ":Telescope frecency<CR>", { desc = "Open telescope frecency extension" })
 
       telescope.setup({
         defaults = {
@@ -437,10 +443,10 @@ return {
         capabilities = capabilities,
       })
 
-      Map("n", "<leader>e", vim.diagnostic.open_float, {})
-      Map("n", "[d", vim.diagnostic.goto_prev, {})
-      Map("n", "]d", vim.diagnostic.goto_next, {})
-      Map("n", "<leader>q", vim.diagnostic.setloclist, {})
+      Map("n", "<leader>e", vim.diagnostic.open_float, { desc = "Open lsp diagnostics windows" })
+      Map("n", "[d", vim.diagnostic.goto_prev, { desc = "Goto the previous lsp diagnostics" })
+      Map("n", "]d", vim.diagnostic.goto_next, { desc = "Goto the next lsp diagnostics" })
+      Map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "LSP setloclist" })
 
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -450,21 +456,20 @@ return {
 
           -- Buffer local mappings.
           -- See `:help vim.lsp.*` for documentation on any of the below functions
-          local opts = { buffer = args.buf }
-          Map("n", "gD", vim.lsp.buf.declaration, opts)
-          Map("n", "gd", vim.lsp.buf.definition, opts)
-          Map("n", "K", vim.lsp.buf.hover, opts)
-          Map("n", "gi", vim.lsp.buf.implementation, opts)
-          Map("n", "gr", vim.lsp.buf.references, opts)
-          Map("n", "<C-k>", vim.lsp.buf.signature_help, opts)
-          Map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
-          Map("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
+          Map("n", "gD", vim.lsp.buf.declaration, { desc = "Goto lsp declaration", buffer = args.buf } )
+          Map("n", "gd", vim.lsp.buf.definition, { desc = "Goto lsp definition", buffer = args.buf } )
+          Map("n", "K", vim.lsp.buf.hover, { desc = "Display lsp info about the symbol", buffer = args.buf } )
+          Map("n", "gi", vim.lsp.buf.implementation, { desc = "Goto lsp implementation of the symbol", buffer = args.buf } )
+          Map("n", "gr", vim.lsp.buf.references, { desc = "Goto lsp references of the symbol", buffer = args.buf } )
+          Map("n", "<C-k>", vim.lsp.buf.signature_help, { desc = "Show lsp help about the symbol", buffer = args.buf } )
+          Map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, { desc = "Add lsp workspace folder", buffer = args.buf } )
+          Map("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, { desc = "Remove lsp workspace folder", buffer = args.buf } )
           Map("n", "<leader>wl", function()
             print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-          end, opts)
-          Map("n", "<leader>D", vim.lsp.buf.type_definition, opts)
-          Map("n", "<leader>rn", vim.lsp.buf.rename, opts)
-          Map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+          end, { desc = "List lsp workspace folders", buffer = args.buf } )
+          Map("n", "<leader>D", vim.lsp.buf.type_definition, { desc = "Goto lsp type definition", buffer = args.buf } )
+          Map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "LSP Rename of the symbol", buffer = args.buf } )
+          Map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Display lsp code action", buffer = args.buf } )
           -- nnoremap('<leader>f', function()
           --   vim.lsp.buf.format { async = true }
           -- end, opts)

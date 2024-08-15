@@ -12,6 +12,7 @@ vim.g.loaded_node_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
+
 -------------------
 -- local options
 -------------------
@@ -19,30 +20,36 @@ local options = {
   number = true,
   relativenumber = true,
   numberwidth = 2,
+
+  -- display white spaces
   list = true,
   listchars = { tab = "→ ", trail = "·", extends = "»", precedes = "«", eol = "¬" },
 
-  background = "dark",
   termguicolors = true,
+  background = "dark",
+  signcolumn = "yes",
 
   cursorline = true,
   wrap = false,
-  signcolumn = "yes",
-  breakindent = true,
 
   inccommand = "split",
 
+  -- tab settings
   expandtab = true,
   tabstop = 2,
   softtabstop = 2,
   shiftwidth = 2,
   shiftround = true,
 
+  -- indentation settings
+  autoindent = true,
   smartindent = true,
+  breakindent = true,
 
+  -- search settings
   ignorecase = true,
-  hlsearch = true,
   smartcase = true,
+  hlsearch = true,
   grepprg = "rg --vimgrep",
   grepformat = "%f:%l:%c:%m", -- :h errorformat
 
@@ -53,6 +60,7 @@ local options = {
   completeopt = "menu,menuone,noselect,preview,noinsert",
   wildmode = "longest:full,full",
 
+  -- splint windows setting
   splitright = true,
   splitbelow = true,
 
@@ -61,6 +69,7 @@ local options = {
   virtualedit = "block",
 
   updatetime = 250,
+  timeout = true,
   timeoutlen = 300,
   mouse = "a",
   mousemoveevent = true,
@@ -94,56 +103,58 @@ function Map(mode, lhs, rhs, opts)
   vim.keymap.set(mode, lhs, rhs, opts)
 end
 
-Map({ "i", "v" }, "jk", "<Esc>", {})
-Map({ "i", "v" }, "kj", "<Esc>", {})
+Map({ "i", "v" }, "jk", "<Esc>", { desc = "Escape to normal mode" })
+Map({ "i", "v" }, "kj", "<Esc>", { desc = "Escape to normal mode" })
 
 -- Movement between panes
-Map("n", "<C-h>", "<C-w>h", {})
-Map("n", "<C-j>", "<C-w>j", {})
-Map("n", "<C-k>", "<C-w>k", {})
-Map("n", "<C-l>", "<C-w>l", {})
+Map("n", "<C-h>", "<C-w>h", { desc = "Move the cursor to the left pane" })
+Map("n", "<C-j>", "<C-w>j", { desc = "Move the cursor to the below pane" })
+Map("n", "<C-k>", "<C-w>k", { desc = "Move the cursor to the above pane" })
+Map("n", "<C-l>", "<C-w>l", { desc = "Move the cursor to the right pane" })
 
 -- spliting windows
-Map("n", "<leader>sv", "<C-w>v", {}) -- split window vertically
-Map("n", "<leader>sh", "<C-w>s", {}) -- split window horizontally
-Map("n", "<leader>se", "<C-w>=", {}) -- make split windows equal in height & width
-Map("n", "<leader>sx", ":close<CR>", {}) -- close the pane
+Map("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
+Map("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
+Map("n", "<leader>se", "<C-w>=", { desc = "Make split window panes equal in size" })
+Map("n", "<leader>sx", ":close<CR>", { desc = "Close the current split window" })
 
 -- Movement between buffers
-Map("n", "<S-l>", ":bnext<CR>", {})
-Map("n", "<S-h>", ":bprevious<CR>", {})
-Map("n", "<S-d>", ":bdelete<CR>", {})
+Map("n", "<S-l>", ":bnext<CR>", { desc = "Move to the next buffer" })
+Map("n", "<S-h>", ":bprevious<CR>", { desc = "Move to the previous buffer" })
+Map("n", "<S-d>", ":bdelete<CR>", { desc = "Close the buffer" })
 
 -- move text in visual mode
-Map("v", "<A-j>", ":m .+1<CR>==", {})
-Map("v", "<A-k>", ":m .-2<CR>==", {})
+Map("v", "<A-j>", ":m .+1<CR>==", { desc = "Move the visual selected line down" })
+Map("v", "<A-k>", ":m .-2<CR>==", { desc = "Move the visual selected line up" })
 
 -- move text in visual block mode
-Map("x", "J", ":move '>+1<CR>gv-gv", {})
-Map("x", "K", ":move '<-2<CR>gv-gv", {})
+Map("x", "J", ":move '>+1<CR>gv-gv", { desc = "Move the visual selected block down" })
+Map("x", "K", ":move '<-2<CR>gv-gv", { desc = "Move the visual selected block up" })
 
 -- Better terminal navigation
-Map("t", "<C-h>", "<C-\\><C-n><C-w>h", {})
-Map("t", "<C-j>", "<C-\\><C-n><C-w>j", {})
-Map("t", "<C-k>", "<C-\\><C-n><C-w>k", {})
-Map("t", "<C-l>", "<C-\\><C-n><C-w>l", {})
+Map("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Move from terminal to the left pane" })
+Map("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Move from terminal to the below pane" })
+Map("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Move from terminal to the above pane" })
+Map("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Move from terminal to the right pane" })
 
 -- Resize window panes with arrow keys
-Map("n", "<C-Up>", ":resize +2<CR>", {})
-Map("n", "<C-Down>", ":resize -2<CR>", {})
-Map("n", "<C-Right>", ":vertical resize +2<CR>", {})
-Map("n", "<C-Left>", ":vertical resize -2<CR>", {})
+Map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase the pane window size horizontally" })
+Map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease the pane window size horizontally" })
+Map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase the pane window size vertically" })
+Map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease the pane window size vertically" })
 
-Map("v", "<", "<gv", {}) -- decrease indent
-Map("v", ">", ">gv", {}) -- increase indent
+Map("v", "<", "<gv", { desc = "Decrease the indentation" })
+Map("v", ">", ">gv", { desc = "Increase the indentation" })
 
 Map("n", "j", [[v:count? "j" : "gj"]], {noremap = true, expr = true})
 Map("n", "k", [[v:count? "k" : "gk"]], {noremap = true, expr = true})
 
 -- Misc bindings
-Map("n", "<leader>a", "ggVG", {}) -- select all
-Map("n", "<leader>nh", ":nohl<CR>", {}) --disable highlights
-Map("n", "<leader>p", '"*p', {}) --disable highlights
+Map("n", "<leader>a", "ggVG", { desc = "Select all..." })
+Map("n", "<leader>nh", ":nohl<CR>", { desc = "Disable highlight of text from hlsearch" })
+Map("n", "<leader>p", '"*p', { desc = "Paste contents from clipboard" })
+Map("n", "<leader>+", "<C-a>", { desc = "Increment the numeral under the cursor" })
+Map("n", "<leader>-", "<C-x>", { desc = "Decrement the numeral under the cursor" })
 
 -----------------------------------------
 -- install and start lazy plugin manager
