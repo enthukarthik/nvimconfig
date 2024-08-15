@@ -327,6 +327,9 @@ return {
   -- LSP Setup
   {
     "williamboman/mason.nvim",
+    dependencies = {
+      "williamboman/mason-lspconfig.nvim",
+    },
     cmd = { "Mason", "MasonInstall", "MasonInstallAll", "MasonUpdate" },
     config = function()
       require("mason").setup({
@@ -364,24 +367,8 @@ return {
       end, {})
 
       vim.g.mason_binaries_list = srv_options.ensure_installed
+      -- require("mason-lspconfig").setup(srv_options)
     end,
-  },
-  {
-    "williamboman/mason-lspconfig.nvim",
-    dependencies = { "williamboman/mason.nvim" },
-    config = true,
-  },
-  {
-    "hrsh7th/cmp-nvim-lsp",
-  },
-  {
-    "L3MON4D3/LuaSnip",
-    version = "v2.*",
-    -- build = "make install_jsregexp",
-    dependencies = {
-      "saadparwaiz1/cmp_luasnip", -- for autocompletion
-      "rafamadriz/friendly-snippets", -- useful snippets
-    },
   },
   {
     "hrsh7th/nvim-cmp",
@@ -389,6 +376,13 @@ return {
     dependencies = {
       "hrsh7th/cmp-buffer", -- source for text in buffer
       "hrsh7th/cmp-path", -- source for file system paths
+      {
+        "L3MON4D3/LuaSnip",
+        version = "v2.*",
+        -- build = "make install_jsregexp",
+      },
+      "saadparwaiz1/cmp_luasnip", -- for autocompletion
+      "rafamadriz/friendly-snippets", -- useful snippets
       "onsails/lspkind.nvim", -- vs-code like pictograms
     },
     config = function()
@@ -486,20 +480,20 @@ return {
 
           -- Buffer local mappings.
           -- See `:help vim.lsp.*` for documentation on any of the below functions
-          Map("n", "gD", vim.lsp.buf.declaration, { desc = "Goto lsp declaration", buffer = args.buf } )
-          Map("n", "gd", vim.lsp.buf.definition, { desc = "Goto lsp definition", buffer = args.buf } )
-          Map("n", "K", vim.lsp.buf.hover, { desc = "Display lsp info about the symbol", buffer = args.buf } )
-          Map("n", "gi", vim.lsp.buf.implementation, { desc = "Goto lsp implementation of the symbol", buffer = args.buf } )
-          Map("n", "gr", vim.lsp.buf.references, { desc = "Goto lsp references of the symbol", buffer = args.buf } )
-          Map("n", "<C-k>", vim.lsp.buf.signature_help, { desc = "Show lsp help about the symbol", buffer = args.buf } )
-          Map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, { desc = "Add lsp workspace folder", buffer = args.buf } )
+          Map("n", "gD",         vim.lsp.buf.declaration,             { desc = "Goto lsp declaration", buffer = args.buf } )
+          Map("n", "gd",         vim.lsp.buf.definition,              { desc = "Goto lsp definition", buffer = args.buf } )
+          Map("n", "K",          vim.lsp.buf.hover,                   { desc = "Display lsp info about the symbol", buffer = args.buf } )
+          Map("n", "gi",         vim.lsp.buf.implementation,          { desc = "Goto lsp implementation of the symbol", buffer = args.buf } )
+          Map("n", "gr",         vim.lsp.buf.references,              { desc = "Goto lsp references of the symbol", buffer = args.buf } )
+          Map("n", "<C-k>",      vim.lsp.buf.signature_help,          { desc = "Show lsp help about the symbol", buffer = args.buf } )
+          Map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder,    { desc = "Add lsp workspace folder", buffer = args.buf } )
           Map("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, { desc = "Remove lsp workspace folder", buffer = args.buf } )
+          Map("n", "<leader>D",  vim.lsp.buf.type_definition,         { desc = "Goto lsp type definition", buffer = args.buf } )
+          Map("n", "<leader>rn", vim.lsp.buf.rename,                  { desc = "LSP Rename of the symbol", buffer = args.buf } )
+          Map("n", "<leader>ca", vim.lsp.buf.code_action,             { desc = "Display lsp code action", buffer = args.buf } )
           Map("n", "<leader>wl", function()
             print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
           end, { desc = "List lsp workspace folders", buffer = args.buf } )
-          Map("n", "<leader>D", vim.lsp.buf.type_definition, { desc = "Goto lsp type definition", buffer = args.buf } )
-          Map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "LSP Rename of the symbol", buffer = args.buf } )
-          Map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Display lsp code action", buffer = args.buf } )
           -- nnoremap('<leader>f', function()
           --   vim.lsp.buf.format { async = true }
           -- end, opts)
